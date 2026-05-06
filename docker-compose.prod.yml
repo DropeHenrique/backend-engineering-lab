@@ -1,0 +1,47 @@
+# Simulação de produção: sem bind-mount, imagens já buildadas, debug desligado.
+services:
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+      target: production
+    volumes: []
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      LOG_CHANNEL: stderr
+    command: >
+      sh -c "chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache || true
+      && touch /var/www/html/database/database.sqlite
+      && php artisan migrate --force
+      && php artisan serve --host=0.0.0.0 --port=8080"
+
+  notification-worker:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+      target: production
+    volumes: []
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      LOG_CHANNEL: stderr
+
+  webhook-service:
+    build:
+      context: ./webhook-service
+      dockerfile: Dockerfile
+      target: production
+    volumes: []
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      LOG_CHANNEL: stderr
+
+  rate-limiter:
+    build:
+      context: ./rate-limiter
+      dockerfile: Dockerfile
+      target: production
+    environment:
+      NODE_ENV: production

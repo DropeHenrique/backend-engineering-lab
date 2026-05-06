@@ -1,0 +1,7 @@
+vendor/
+node_modules/
+.git/
+storage/logs/
+.phpunit.result.cache
+bootstrap/cache/*
+!bootstrap/cache/.gitignore

@@ -1,0 +1,47 @@
+name: rate-limiter
+
+on:
+  push:
+    paths:
+      - "rate-limiter/**"
+      - ".github/workflows/rate-limiter.yml"
+  pull_request:
+    paths:
+      - "rate-limiter/**"
+      - ".github/workflows/rate-limiter.yml"
+
+defaults:
+  run:
+    working-directory: rate-limiter
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: rate-limiter/package-lock.json
+
+      - run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Prettier (check)
+        run: npm run format:check
+
+      - name: Jest
+        run: npm test
+
+  docker:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker (production stage)
+        run: docker build -f rate-limiter/Dockerfile --target production -t lab-rate-limiter:ci ./rate-limiter

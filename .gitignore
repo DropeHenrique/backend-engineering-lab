@@ -1,0 +1,45 @@
+# Environment
+.env
+.env.backup
+.env.production
+*.local
+
+# PHP / Laravel
+/vendor/
+node_modules/
+bootstrap/cache/*
+!bootstrap/cache/.gitignore
+storage/*.key
+storage/logs/*
+!storage/logs/.gitignore
+storage/framework/cache/*
+!storage/framework/cache/.gitignore
+storage/framework/sessions/*
+!storage/framework/sessions/.gitignore
+storage/framework/views/*
+!storage/framework/views/.gitignore
+.phpunit.result.cache
+.php-cs-fixer.cache
+coverage/
+*.cache
+
+# Node
+npm-debug.log*
+yarn-error.log*
+dist/
+build/
+coverage/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml

@@ -1,0 +1,94 @@
+name: notification-service
+
+on:
+  push:
+    paths:
+      - "notification-service/**"
+      - ".github/workflows/notification-service.yml"
+  pull_request:
+    paths:
+      - "notification-service/**"
+      - ".github/workflows/notification-service.yml"
+
+defaults:
+  run:
+    working-directory: notification-service
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, sockets, pdo_sqlite, zip
+          coverage: none
+
+      - name: Instalar dependências
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Pint (dry-run)
+        run: composer run lint
+
+      - name: PHPStan
+        run: composer run analyse
+
+      - name: PHPUnit
+        env:
+          APP_ENV: testing
+          CACHE_STORE: array
+        run: composer run test
+
+  docker:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker (production stage)
+        run: docker build -f notification-service/Dockerfile --target production -t lab-notification:ci ./notification-service
+
+  integration_services:
+    needs: quality
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 8
+      rabbitmq:
+        image: rabbitmq:3-management-alpine
+        ports:
+          - 5672:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping" --health-interval 10s --health-timeout 5s --health-retries 12
+    defaults:
+      run:
+        working-directory: notification-service
+    env:
+      APP_ENV: testing
+      CACHE_STORE: redis
+      REDIS_CLIENT: predis
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: '6379'
+      RABBITMQ_HOST: 127.0.0.1
+      RABBITMQ_PORT: '5672'
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_VHOST: /
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, sockets, pdo_sqlite, zip
+
+      - name: Instalar dependências
+        run: composer install --prefer-dist --no-interaction
+
+      - name: PHPUnit com Redis e RabbitMQ (serviços reais na CI)
+        run: composer run test
