@@ -14,6 +14,13 @@ Serviço de borda com **token bucket** e **sliding window** implementados em **L
 | APIs de leitura com tráfego bursty | Token bucket |
 | Login / mutações sensíveis | Sliding window |
 
+## Swagger UI
+
+Documentação OpenAPI servida pelo próprio Express:
+
+- **UI**: <http://localhost:3000/api-docs>
+- **JSON**: <http://localhost:3000/openapi.json>
+
 ## Operação
 
 ```bash

@@ -9,6 +9,14 @@ Recepção segura de webhooks (`POST /webhook/{provider}`) com **raw body**, HMA
 - `php-amqplib` publisher
 - PHPUnit + Larastan + Pint
 
+## Swagger (OpenAPI 3)
+
+Swagger UI em **`/api/documentation`** quando as dev-deps estão instaladas.
+
+- Direto ao Laravel (host Compose): <http://localhost:8082/api/documentation>
+- Atrás do rate-limiter: ajuste o “Server” na UI ou use Try it com URL base `http://localhost:3000` apenas para `/webhook/*` (demais rotas ficam no :8082).
+- Regenerar: `composer run docs`
+
 ## Providers
 
 | Slug       | Validação resumida |

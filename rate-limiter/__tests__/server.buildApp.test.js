@@ -27,6 +27,10 @@ describe('buildApp', () => {
 
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({ status: 'ok', service: 'rate-limiter' });
+
+      const spec = await request(app).get('/openapi.json');
+      expect(spec.status).toBe(200);
+      expect(spec.body.info.title).toBe('rate-limiter');
     } finally {
       await redis.quit();
     }

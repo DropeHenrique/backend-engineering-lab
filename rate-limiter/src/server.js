@@ -1,7 +1,9 @@
 'use strict';
 
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
+const swaggerUi = require('swagger-ui-express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const { createRedis } = require('./redisClient');
 const { loadScripts } = require('./redisScripts');
@@ -10,6 +12,9 @@ const { rateLimiterMiddleware } = require('./middleware/rateLimiter');
 const PORT = Number(process.env.PORT || 3000);
 const REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 const WEBHOOK_UPSTREAM = process.env.WEBHOOK_UPSTREAM || 'http://127.0.0.1:8082';
+
+/** @type {Record<string, unknown>} */
+const openapiSpec = require(path.join(__dirname, '..', 'openapi.json'));
 
 /**
  * Multiplicadores de limite por plano (cabecalho X-Plan).
@@ -64,6 +69,13 @@ async function buildApp() {
       service: 'rate-limiter',
     }),
   );
+
+  app.use(
+    '/api-docs',
+    swaggerUi.serve,
+    swaggerUi.setup(openapiSpec, { customSiteTitle: 'rate-limiter Swagger' }),
+  );
+  app.get('/openapi.json', (_req, res) => res.type('application/json').send(openapiSpec));
 
   /** Login sensivel — sliding window apertado */
   app.post(

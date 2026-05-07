@@ -1,0 +1,82 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "rate-limiter",
+    "version": "1.0.0",
+    "description": "Express + Redis (Lua): Token Bucket / Sliding Window. `/webhook/*` faz proxy HTTP para WEBHOOK_UPSTREAM (via compose: webhook-service)."
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "Docker compose (serviço rate-limiter)" }
+  ],
+  "tags": [
+    { "name": "Saúde" },
+    { "name": "Demo" },
+    { "name": "Proxy webhook" }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["Saúde"],
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "ok" },
+                    "service": { "type": "string", "example": "rate-limiter" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/login": {
+      "post": {
+        "tags": ["Demo"],
+        "summary": "Rota demo (Sliding Window, limite restrito)",
+        "responses": {
+          "200": { "description": "OK (dentro da quota ou modo degradado allow)" },
+          "429": { "description": "Too Many Requests" },
+          "503": { "description": "Redis indisponível e REDIS_DOWN_MODE=deny" }
+        }
+      }
+    },
+    "/api/data": {
+      "get": {
+        "tags": ["Demo"],
+        "summary": "Rota demo (Token Bucket)",
+        "parameters": [
+          {
+            "name": "X-Plan",
+            "in": "header",
+            "schema": { "type": "string", "enum": ["free", "pro", "enterprise"] },
+            "description": "Opcional — multiplica limites configurados"
+          }
+        ],
+        "responses": {
+          "200": { "description": "OK" },
+          "429": { "description": "Too Many Requests" }
+        }
+      }
+    },
+    "/webhook/generic": {
+      "post": {
+        "tags": ["Proxy webhook"],
+        "summary": "Proxy POST → upstream (webhook-service), ex.: provider generic",
+        "description": "Repassa método/corpo/headers. No upstream ajuste URL para `/webhook/{provider}` (ex. generic). Headers usuais: X-Signature (HMAC), X-Timestamp, X-Nonce.",
+        "responses": {
+          "200": { "description": "Resposta do upstream" },
+          "401": { "description": "Via upstream — HMAC" },
+          "409": { "description": "Via upstream — replay" },
+          "429": { "description": "Bloqueado pelo rate limiter" }
+        }
+      }
+    }
+  }
+}

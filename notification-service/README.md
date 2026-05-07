@@ -26,6 +26,15 @@ POST /api/events → validação por tipo → domain_events(status=received)
 
 Redis Pub/Sub é fan-out efêmero sem persistência; **não há DLQ nem retentativa nativa**. Para garantir fila e dead-letter usamos Rabbit; Redis fica com idempotência/dedup de processamento.
 
+## Swagger (OpenAPI 3)
+
+Com dependências de desenvolvimento (`composer install`): interface **Swagger UI** em **`/api/documentation`**.
+
+- Docker (host): <http://localhost:8081/api/documentation>
+- Regenerar JSON: `composer run docs`
+
+> Em `APP_ENV=production` ou sem `composer install --dev`, o pacote Swagger não existe — use apenas ambientes dev/lab ou gere o arquivo com `composer run docs` onde o código estiver completo.
+
 ## At-least-once e duplicidade
 
 O broker pode reentregar; o consumer usa chave `notification:processed:{correlation_id}` com TTL 24h após sucesso. A API deduplica (`correlation_id`,`type`) com HTTP 409.

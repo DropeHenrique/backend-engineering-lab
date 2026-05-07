@@ -13,6 +13,7 @@
         "predis/predis": "^3.4"
     },
     "require-dev": {
+        "darkaonline/l5-swagger": "^11.0",
         "fakerphp/faker": "^1.23",
         "larastan/larastan": "^3.9",
         "laravel/pail": "^1.1",
@@ -52,6 +53,7 @@
             "@php artisan migrate --graceful --ansi"
         ],
         "test": "@php artisan test",
+        "docs": "@php artisan l5-swagger:generate",
         "lint": "@php ./vendor/bin/pint --test",
         "analyse": "@php ./vendor/bin/phpstan analyse --memory-limit=512M",
         "dev": [

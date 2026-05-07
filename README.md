@@ -97,6 +97,14 @@ Health checks:
 - Webhook: `GET http://localhost:8082/health`
 - Rate limiter: `GET http://localhost:3000/health`
 
+### Swagger / OpenAPI (testar rotas)
+
+| Serviço | UI | Observação |
+|---------|----|------------|
+| notification-service | [http://localhost:8081/api/documentation](http://localhost:8081/api/documentation) | `composer run docs` para regerar (`require-dev`) |
+| webhook-service | [http://localhost:8082/api/documentation](http://localhost:8082/api/documentation) | Idem |
+| rate-limiter | [http://localhost:3000/api-docs](http://localhost:3000/api-docs) | Especificação em [/openapi.json](http://localhost:3000/openapi.json) |
+
 Exemplo via rate limiter (webhook atrás do proxy):
 
 ```bash
